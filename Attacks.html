@@ -1,0 +1,3435 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Added cryptojacking, insider, dns attacks -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Attack Visualizer | Learn Security</title>
+    <link rel="icon" type="image/png" href="./image.png">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Fira+Mono:wght@400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-dark: #0a0e27;
+            --bg-card: #141933;
+            --accent-blue: #00d9ff;
+            --accent-red: #ff0055;
+            --accent-green: #00ff88;
+            --accent-yellow: #ffd700;
+            --text-primary: #e8edf4;
+            --text-secondary: #8892b0;
+            --glow-blue: rgba(0, 217, 255, 0.4);
+            --glow-red: rgba(255, 0, 85, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Fira Mono', monospace;
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Animated background grid */
+        .background-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(rgba(0, 217, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 217, 255, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px;
+            animation: gridMove 20s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes gridMove {
+            0% {
+                transform: translate(0, 0);
+            }
+
+            100% {
+                transform: translate(50px, 50px);
+            }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 60px;
+            padding: 40px 20px;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            animation: glowPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+
+            0%,
+            100% {
+                filter: drop-shadow(0 0 20px var(--glow-blue));
+            }
+
+            50% {
+                filter: drop-shadow(0 0 40px var(--glow-blue));
+            }
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            letter-spacing: 2px;
+        }
+
+        .attacks-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .attack-card {
+            background: var(--bg-card);
+            border: 2px solid rgba(0, 217, 255, 0.2);
+            border-radius: 15px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .attack-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 217, 255, 0.1), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .attack-card:hover::before {
+            left: 100%;
+        }
+
+        .attack-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-blue);
+            box-shadow: 0 10px 40px var(--glow-blue);
+        }
+
+        .attack-card.active {
+            border-color: var(--accent-green);
+            box-shadow: 0 10px 40px rgba(0, 255, 136, 0.4);
+        }
+
+        .attack-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.4rem;
+            color: var(--accent-blue);
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .attack-icon {
+            font-size: 1.8rem;
+        }
+
+        .attack-description {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .play-btn {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-green));
+            border: none;
+            color: var(--bg-dark);
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+        }
+
+        .play-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px var(--glow-blue);
+        }
+
+        .visualization-area {
+            background: var(--bg-card);
+            border: 2px solid var(--accent-blue);
+            border-radius: 20px;
+            padding: 40px;
+            min-height: 600px;
+            margin-top: 40px;
+            position: relative;
+            box-shadow: 0 10px 50px var(--glow-blue);
+        }
+
+        .viz-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--accent-green);
+            text-align: center;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .animation-canvas {
+            width: 100%;
+            height: 500px;
+            position: relative;
+            background: rgba(10, 14, 39, 0.5);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            overflow: hidden;
+        }
+
+        /* Attack Animation Elements */
+        .node {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            border: 3px solid;
+            transition: all 0.3s ease;
+        }
+
+        .attacker {
+            background: rgba(255, 0, 85, 0.2);
+            border-color: var(--accent-red);
+            box-shadow: 0 0 30px var(--glow-red);
+        }
+
+        .victim {
+            background: rgba(0, 217, 255, 0.2);
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 30px var(--glow-blue);
+        }
+
+        .server {
+            background: rgba(0, 255, 136, 0.2);
+            border-color: var(--accent-green);
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.4);
+        }
+
+        .packet {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--accent-red);
+            box-shadow: 0 0 15px var(--glow-red);
+            animation: pulse 0.5s ease-in-out infinite;
+            z-index: 10;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.2);
+                opacity: 0.7;
+            }
+        }
+
+        .trail {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 5;
+        }
+
+        .explosion {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--accent-red), transparent);
+            animation: explode 0.6s ease-out forwards;
+            pointer-events: none;
+            z-index: 15;
+        }
+
+        @keyframes explode {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .crack {
+            position: absolute;
+            width: 2px;
+            background: var(--accent-red);
+            transform-origin: top;
+            animation: crackGrow 0.3s ease-out forwards;
+            box-shadow: 0 0 10px var(--glow-red);
+        }
+
+        @keyframes crackGrow {
+            0% {
+                height: 0;
+                opacity: 1;
+            }
+
+            100% {
+                height: 60px;
+                opacity: 0.3;
+            }
+        }
+
+        .shield {
+            position: absolute;
+            width: 120px;
+            height: 120px;
+            border: 3px solid var(--accent-blue);
+            border-radius: 50%;
+            animation: shieldPulse 1s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes shieldPulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 0.5;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.8;
+            }
+        }
+
+        .typing-indicator {
+            position: absolute;
+            display: flex;
+            gap: 5px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            animation: typingBounce 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingBounce {
+
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+            }
+
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .warning-flash {
+            animation: warningFlash 0.5s ease-in-out 3;
+        }
+
+        @keyframes warningFlash {
+
+            0%,
+            100% {
+                background: rgba(0, 217, 255, 0.2);
+            }
+
+            50% {
+                background: rgba(255, 0, 85, 0.5);
+            }
+        }
+
+        .lock-animation {
+            animation: lockShake 0.5s ease-in-out;
+        }
+
+        @keyframes lockShake {
+
+            0%,
+            100% {
+                transform: rotate(0deg);
+            }
+
+            25% {
+                transform: rotate(-10deg);
+            }
+
+            75% {
+                transform: rotate(10deg);
+            }
+        }
+
+        .data-breach {
+            position: absolute;
+            font-size: 0.7rem;
+            color: var(--accent-red);
+            animation: dataBreach 2s ease-out forwards;
+            pointer-events: none;
+            font-family: 'Fira Mono', monospace;
+        }
+
+        @keyframes dataBreach {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.5);
+            }
+        }
+
+        .code-injection {
+            position: absolute;
+            font-size: 0.6rem;
+            color: var(--accent-green);
+            font-family: 'Fira Mono', monospace;
+            white-space: nowrap;
+            animation: codeScroll 3s linear forwards;
+            opacity: 0.8;
+        }
+
+        @keyframes codeScroll {
+            0% {
+                transform: translateX(0);
+            }
+
+            100% {
+                transform: translateX(200px);
+                opacity: 0;
+            }
+        }
+
+        .network-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+            transform-origin: left;
+            animation: lineGrow 0.8s ease-out forwards;
+        }
+
+        @keyframes lineGrow {
+            0% {
+                width: 0;
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                width: 100%;
+                opacity: 0.3;
+            }
+        }
+
+        .data-flow {
+            position: absolute;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--accent-blue), transparent);
+            animation: flowMove 1.5s linear infinite;
+        }
+
+        @keyframes flowMove {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .malicious-flow {
+            background: linear-gradient(90deg, transparent, var(--accent-red), transparent);
+        }
+
+        .label {
+            position: absolute;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background: var(--bg-dark);
+            padding: 5px 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            white-space: nowrap;
+        }
+
+        .explanation {
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(0, 217, 255, 0.05);
+            border-left: 4px solid var(--accent-blue);
+            border-radius: 8px;
+        }
+
+        .explanation h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent-blue);
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .explanation p {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            margin-bottom: 10px;
+        }
+
+        .step {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin: 10px 0;
+            padding: 12px;
+            background: rgba(0, 217, 255, 0.05);
+            border-radius: 8px;
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.5s ease;
+        }
+
+        .step.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .step-number {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--accent-green);
+            font-weight: 700;
+            min-width: 40px;
+        }
+
+        .reset-btn {
+            background: linear-gradient(135deg, var(--accent-red), #ff6b6b);
+            border: none;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px var(--glow-red);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Floating particles effect */
+        .particle {
+            position: fixed;
+            width: 3px;
+            height: 3px;
+            background: var(--accent-blue);
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.6;
+            animation: float 15s linear infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.6;
+            }
+
+            90% {
+                opacity: 0.6;
+            }
+
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .attacks-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .visualization-area {
+                padding: 20px;
+            }
+
+            .animation-canvas {
+                height: 400px;
+            }
+        }
+
+        /* Navigation Styles */
+        .navbar {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+            padding: 15px;
+            background: rgba(20, 25, 51, 0.8);
+            border-radius: 50px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            backdrop-filter: blur(10px);
+            /* position: sticky; Removed as per user request */
+            /* top: 20px; */
+            z-index: 100;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1rem;
+            padding: 10px 25px;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .nav-link:hover {
+            color: var(--accent-blue);
+            background: rgba(0, 217, 255, 0.1);
+        }
+
+        .nav-link.active {
+            color: var(--bg-dark);
+            background: var(--accent-blue);
+            box-shadow: 0 0 15px var(--glow-blue);
+            font-weight: 700;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .tab-content.active-tab {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Concepts Section */
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2rem;
+            color: var(--accent-green);
+            margin: 40px 0 20px;
+            text-align: center;
+        }
+
+        .concepts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 60px;
+        }
+
+        .concept-card {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .concept-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent-green);
+            box-shadow: 0 10px 30px rgba(0, 255, 136, 0.1);
+        }
+
+        .concept-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .concept-title {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--accent-green);
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+
+        .concept-desc {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* CIA Triad Special Styling */
+        .cia-container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin: 50px 0;
+            position: relative;
+        }
+
+        .cia-item {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            border: 4px solid var(--accent-blue);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 35px;
+            background: rgba(10, 14, 39, 0.8);
+            box-shadow: 0 0 30px rgba(0, 217, 255, 0.2);
+            transition: all 0.3s ease;
+            z-index: 2;
+        }
+
+        .cia-item:hover {
+            transform: scale(1.05);
+            border-color: var(--accent-green);
+            background: rgba(20, 25, 51, 0.95);
+            box-shadow: 0 0 50px rgba(0, 255, 136, 0.4);
+        }
+
+        .cia-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            color: var(--accent-blue);
+            margin-bottom: 15px;
+        }
+
+        .cia-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Connecting lines for CIA */
+        .cia-triangle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            border: 2px dashed rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            z-index: 1;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="background-grid"></div>
+
+    <!-- Floating particles -->
+    <script>
+        for (let i = 0; i < 15; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+            document.body.appendChild(particle);
+        }
+    </script>
+
+    <div class="container">
+        <header>
+            <h1>Cyber Security Hub</h1>
+            <p class="subtitle">Interactive Learning | Visualizations | Core Concepts</p>
+        </header>
+
+        <nav class="navbar">
+            <div class="nav-link active" onclick="switchTab('visualizations-tab')">⚔️ Attack Visualizer</div>
+            <div class="nav-link" onclick="switchTab('concepts-tab')">🛡️ Security Concepts</div>
+        </nav>
+
+        <!-- Visualizations Tab -->
+        <div id="visualizations-tab" class="tab-content active-tab">
+            <div class="attacks-grid">
+                <div class="attack-card" data-attack="phishing">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">🎣</span>
+                        Phishing Attack
+                    </h2>
+                    <p class="attack-description">
+                        Attackers disguise themselves as trustworthy entities to steal sensitive information like
+                        passwords
+                        and credit card numbers.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('phishing')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="ddos">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">💥</span>
+                        DDoS Attack
+                    </h2>
+                    <p class="attack-description">
+                        Distributed Denial of Service floods a server with traffic from multiple sources, overwhelming
+                        it
+                        until it crashes.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('ddos')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="mitm">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">👤</span>
+                        Man-in-the-Middle
+                    </h2>
+                    <p class="attack-description">
+                        Attacker secretly intercepts and relays communication between two parties, potentially altering
+                        the
+                        messages.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('mitm')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="sql">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">💉</span>
+                        SQL Injection
+                    </h2>
+                    <p class="attack-description">
+                        Malicious SQL code is inserted into application queries, allowing attackers to view, modify, or
+                        delete database data.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('sql')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="ransomware">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">🔒</span>
+                        Ransomware
+                    </h2>
+                    <p class="attack-description">
+                        Malware encrypts victim's files and demands payment for the decryption key, holding data
+                        hostage.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('ransomware')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="xss">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">⚡</span>
+                        Cross-Site Scripting
+                    </h2>
+                    <p class="attack-description">
+                        Malicious scripts are injected into trusted websites, executing in victim's browser to steal
+                        data or
+                        hijack sessions.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('xss')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="bruteforce">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">🔨</span>
+                        Brute Force Attack
+                    </h2>
+                    <p class="attack-description">
+                        Attackers systematically try every possible password combination until finding the correct one
+                        to
+                        gain unauthorized access.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('bruteforce')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="trojan">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">🐴</span>
+                        Trojan Horse
+                    </h2>
+                    <p class="attack-description">
+                        Malware disguised as legitimate software tricks users into installing it, providing backdoor
+                        access
+                        to attackers.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('trojan')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="arp">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">🔀</span>
+                        ARP Spoofing
+                    </h2>
+                    <p class="attack-description">
+                        Attacker sends fake ARP messages to link their MAC address with legitimate IP, intercepting
+                        network
+                        traffic.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('arp')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="keylogger">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">⌨️</span>
+                        Keylogger Attack
+                    </h2>
+                    <p class="attack-description">
+                        Secretly records every keystroke made by the victim, capturing passwords, messages, and
+                        sensitive
+                        information.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('keylogger')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="zeroday">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">💀</span>
+                        Zero-Day Exploit
+                    </h2>
+                    <p class="attack-description">
+                        Attackers exploit unknown vulnerabilities in software before developers can patch them, leaving
+                        no
+                        defense.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('zeroday')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="botnet">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">🕸️</span>
+                        Botnet Creation
+                    </h2>
+                    <p class="attack-description">
+                        Network of infected computers controlled remotely to perform coordinated attacks, send spam, or
+                        mine
+                        cryptocurrency.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('botnet')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="cryptojacking">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">⛏️</span>
+                        Cryptojacking
+                    </h2>
+                    <p class="attack-description">
+                        Unauthorized use of a victim's computer processing power to mine cryptocurrency without their
+                        consent.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('cryptojacking')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="insider">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">🏢</span>
+                        Insider Threat
+                    </h2>
+                    <p class="attack-description">
+                        Malicious activity from within the organization, such as employees stealing data or sabotaging
+                        systems.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('insider')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="dns">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">🌐</span>
+                        DNS Spoofing
+                    </h2>
+                    <p class="attack-description">
+                        Corrupting Domain Name System data to redirect traffic from legitimate websites to malicious
+                        ones.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('dns')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="buffer">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">🪣</span>
+                        Buffer Overflow
+                    </h2>
+                    <p class="attack-description">
+                        Overwriting a program's memory buffer to crash the system or execute malicious code.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('buffer')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="session">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">🍪</span>
+                        Session Hijacking
+                    </h2>
+                    <p class="attack-description">
+                        Stealing a valid session cookie to impersonate a legitimate user without needing their password.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('session')">Visualize Attack</button>
+                </div>
+
+                <div class="attack-card" data-attack="rainbow">
+                    <h2 class="attack-title">
+                        <span class="attack-icon">🌈</span>
+                        Rainbow Table Attack
+                    </h2>
+                    <p class="attack-description">
+                        Using pre-computed tables of hash values to crack passwords much faster than brute force.
+                    </p>
+                    <button class="play-btn" onclick="startAttack('rainbow')">Visualize Attack</button>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="visualizationArea" class="visualization-area hidden">
+            <h2 class="viz-title" id="vizTitle">Attack Visualization</h2>
+            <div class="animation-canvas" id="animationCanvas"></div>
+            <div class="explanation" id="explanation"></div>
+            <button class="reset-btn" onclick="resetVisualization()">Reset & Choose Another</button>
+        </div>
+    </div> <!-- End of Visualizations Tab -->
+
+    <!-- Concepts Tab -->
+    <div id="concepts-tab" class="tab-content">
+        <h2 class="section-title">The CIA Triad</h2>
+        <p style="text-align: center; max-width: 800px; margin: 0 auto 40px; color: var(--text-secondary);">
+            The core pillars of information security. Every security control addresses at least one of these three
+            principles.
+        </p>
+
+        <div class="cia-container">
+            <div class="cia-triangle"></div>
+
+            <div class="cia-item">
+                <span class="concept-icon">🤐</span>
+                <div class="cia-label">Confidentiality</div>
+                <div class="cia-text">Ensuring sensitive information is accessed only by authorized parties.</div>
+            </div>
+
+            <div class="cia-item">
+                <span class="concept-icon">🛡️</span>
+                <div class="cia-label">Integrity</div>
+                <div class="cia-text">Maintaining accuracy and ensuring data hasn't been tampered with.</div>
+            </div>
+
+            <div class="cia-item">
+                <span class="concept-icon">⚡</span>
+                <div class="cia-label">Availability</div>
+                <div class="cia-text">Ensuring information and resources are accessible when needed.</div>
+            </div>
+        </div>
+
+        <!-- Core Security Services -->
+        <h2 class="section-title">Core Security Services</h2>
+        <div class="concepts-grid">
+            <div class="concept-card">
+                <span class="concept-icon">🔑</span>
+                <h3 class="concept-title">Authentication</h3>
+                <p class="concept-desc">
+                    Verifying the identity of a user, device, or system. "Are you who you say you are?"
+                    <br><br>
+                    <em>Examples: Passwords, Biometrics, 2FA.</em>
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">👮</span>
+                <h3 class="concept-title">Authorization</h3>
+                <p class="concept-desc">
+                    Determining what an authenticated user is allowed to do.
+                    <br><br>
+                    <em>Examples: Admin vs User permissions, Read-only access.</em>
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">✍️</span>
+                <h3 class="concept-title">Non-Repudiation</h3>
+                <p class="concept-desc">
+                    Proving that an action happened and who did it, so they cannot deny it later.
+                    <br><br>
+                    <em>Examples: Digital Signatures, Audit Logs.</em>
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">🧱</span>
+                <h3 class="concept-title">Access Control</h3>
+                <p class="concept-desc">
+                    Restrictions that selectively allow or deny access to resources.
+                    <br><br>
+                    <em>Examples: Firewalls, Door Locks, File Permissions.</em>
+                </p>
+            </div>
+        </div>
+
+        <!-- Attacker Methodologies Section -->
+        <h2 class="section-title">Attacker Methodologies & Attack Types</h2>
+        <div class="concepts-grid">
+            <div class="concept-card">
+                <span class="concept-icon">⛓️</span>
+                <h3 class="concept-title">Cyber Kill Chain</h3>
+                <p class="concept-desc">
+                    A model identifying the stages of a cyber attack: Reconnaissance, Weaponization, Delivery,
+                    Exploitation, Installation, Command & Control, and Actions on Objectives.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">🎣</span>
+                <h3 class="concept-title">Phishing & Social Engineering</h3>
+                <p class="concept-desc">
+                    Attacks that exploit human psychology rather than technical flaws. Includes phishing emails,
+                    pretexting, and baiting to steal credentials or deliver malware.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">🦠</span>
+                <h3 class="concept-title">Malware Types</h3>
+                <p class="concept-desc">
+                    <strong>Ransomware:</strong> Encrypts data for ransom.<br>
+                    <strong>Trojans:</strong> Disguises as legitimate software.<br>
+                    <strong>Spyware:</strong> Silently monitors user activity.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">💉</span>
+                <h3 class="concept-title">Injection Attacks</h3>
+                <p class="concept-desc">
+                    <strong>SQLi:</strong> Malicious SQL queries manipulating databases.<br>
+                    <strong>XSS:</strong> Injecting scripts into trusted websites to potentialy hijack user sessions.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">👤</span>
+                <h3 class="concept-title">Man-in-the-Middle (Adversary-in-the-Middle)</h3>
+                <p class="concept-desc">
+                    Interception of communication between two parties. Often occurs on unsecured public Wi-Fi networks
+                    where attackers eavesdrop on data.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">💥</span>
+                <h3 class="concept-title">DDoS Attacks</h3>
+                <p class="concept-desc">
+                    Distributed Denial of Service. Overwhelming a target with traffic from multiple sources (botnet) to
+                    make a service unavailable.
+                </p>
+            </div>
+        </div>
+
+        <!-- Core Security Principles Section -->
+        <h2 class="section-title">Core Security Principles</h2>
+        <div class="concepts-grid">
+            <div class="concept-card">
+                <span class="concept-icon">🆔</span>
+                <h3 class="concept-title">Authentication vs Authorization</h3>
+                <p class="concept-desc">
+                    <strong>Authentication:</strong> "Who are you?" (Passwords, Biometrics)<br>
+                    <strong>Authorization:</strong> "What are you allowed to do?" (Permissions, keycards)
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">✍️</span>
+                <h3 class="concept-title">Non-Repudiation</h3>
+                <p class="concept-desc">
+                    Assurance that the sender of information is provided with proof of delivery and the recipient is
+                    provided with proof of the sender's identity, so neither can later deny having processed the
+                    information.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">🏰</span>
+                <h3 class="concept-title">Defense in Depth</h3>
+                <p class="concept-desc">
+                    Layered security approach. If one mechanism fails (e.g., Firewall), others (IPS, Encryption,
+                    Endpoint Security) step in to stop the attack.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">📉</span>
+                <h3 class="concept-title">Least Privilege</h3>
+                <p class="concept-desc">
+                    Users and systems should have only the minimum level of access (or permissions) necessary to perform
+                    their specific job functions.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">🚫</span>
+                <h3 class="concept-title">Zero Trust</h3>
+                <p class="concept-desc">
+                    "Never Trust, Always Verify." A security model that assumes no user or device is trusted by default,
+                    even if they are inside the network perimeter.
+                </p>
+            </div>
+        </div>
+
+        <!-- Technical & Architectural Security Section -->
+        <h2 class="section-title">Technical & Architectural Security</h2>
+        <div class="concepts-grid">
+            <div class="concept-card">
+                <span class="concept-icon">🔐</span>
+                <h3 class="concept-title">Encryption</h3>
+                <p class="concept-desc">
+                    Scrambling data to make it unreadable to unauthorized parties.<br>
+                    <strong>Data at Rest:</strong> Encrypting stored files.<br>
+                    <strong>Data in Transit:</strong> Using HTTPS/TLS for secure communication.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">🧱</span>
+                <h3 class="concept-title">Firewalls & WAFs</h3>
+                <p class="concept-desc">
+                    <strong>Firewalls:</strong> Monitor and control incoming/outgoing network traffic.<br>
+                    <strong>WAF:</strong> Filters malicious HTTP requests specifically targeting web applications.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">🚨</span>
+                <h3 class="concept-title">IDS / IPS</h3>
+                <p class="concept-desc">
+                    <strong>IDS:</strong> Intrusion Detection System (Alerts on suspicion).<br>
+                    <strong>IPS:</strong> Intrusion Prevention System (Blocks potential attacks).
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">✂️</span>
+                <h3 class="concept-title">Network Segmentation</h3>
+                <p class="concept-desc">
+                    Dividing a computer network into smaller subnets (segments). This limits the spread of an attack
+                    (lateral movement) if one segment is breached.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">#️⃣</span>
+                <h3 class="concept-title">Hashing & Checksums</h3>
+                <p class="concept-desc">
+                    Creating a unique fixed-size string ("fingerprint") from data. Used to verify data integrity and
+                    ensure files haven't been altered.
+                </p>
+            </div>
+        </div>
+
+        <!-- Operational & Proactive Security Section -->
+        <h2 class="section-title">Operational & Proactive Security</h2>
+        <div class="concepts-grid">
+            <div class="concept-card">
+                <span class="concept-icon">🩹</span>
+                <h3 class="concept-title">Patch Management</h3>
+                <p class="concept-desc">
+                    The process of distributing and applying updates to software. Patches often fix security
+                    vulnerabilities that potential attackers could exploit.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">🎯</span>
+                <h3 class="concept-title">Vulnerability Assessment & Penetration Testing (VAPT)</h3>
+                <p class="concept-desc">
+                    Simulating authorized cyberattacks on your computer system to evaluate the security of the system
+                    and find vulnerabilities before malicious hackers do.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">🚑</span>
+                <h3 class="concept-title">Incident Response & Disaster Recovery</h3>
+                <p class="concept-desc">
+                    <strong>IR:</strong> The process of detecting, containing, and recovering from a security
+                    breach.<br>
+                    <strong>DR:</strong> restoring IT infrastructure and operations after a disaster.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">💾</span>
+                <h3 class="concept-title">Backup (3-2-1 Rule)</h3>
+                <p class="concept-desc">
+                    Keep <strong>3</strong> copies of your data, on <strong>2</strong> different media types, with
+                    <strong>1</strong> copy kept off-site (e.g., cloud or physical location).
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">📊</span>
+                <h3 class="concept-title">SIEM</h3>
+                <p class="concept-desc">
+                    Security Information and Event Management. Centralizes logs from various sources to analyze security
+                    alerts and detect anomalies in real-time.
+                </p>
+            </div>
+        </div>
+
+
+        <!-- Advanced Security Domains Section -->
+        <h2 class="section-title">Advanced Security Domains</h2>
+        <div class="concepts-grid">
+            <div class="concept-card">
+                <span class="concept-icon">🔑</span>
+                <h3 class="concept-title">Public Key Infrastructure (PKI)</h3>
+                <p class="concept-desc">
+                    A framework managing digital keys and certificates. Key to enabling secure encrypted communication
+                    (like
+                    HTTPS) and digital signatures.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">📱</span>
+                <h3 class="concept-title">IAM & MFA</h3>
+                <p class="concept-desc">
+                    <strong>IAM:</strong> Managing digital identities and access rights.<br>
+                    <strong>MFA:</strong> Requiring multiple forms of verification (Something you know, have, or are)
+                    for
+                    login.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">🚀</span>
+                <h3 class="concept-title">DevSecOps</h3>
+                <p class="concept-desc">
+                    Integrating security practices within the DevOps process. "Shifting Left" to address security early
+                    in
+                    the software development lifecycle.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">🍯</span>
+                <h3 class="concept-title">Honeypots & Deception</h3>
+                <p class="concept-desc">
+                    Decoy systems designed to lure cyber attackers. They distract hackers from real assets and allow
+                    security teams to study their behavior.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">☁️</span>
+                <h3 class="concept-title">Cloud Security</h3>
+                <p class="concept-desc">
+                    Protecting data and applications in the cloud. Involves understanding the "Shared Responsibility
+                    Model"
+                    between the provider (AWS/Azure) and the customer.
+                </p>
+            </div>
+        </div>
+
+        <!-- Security Governance & Compliance Section -->
+        <h2 class="section-title">Security Governance & Compliance</h2>
+        <div class="concepts-grid">
+            <div class="concept-card">
+                <span class="concept-icon">⚖️</span>
+                <h3 class="concept-title">Risk Management</h3>
+                <p class="concept-desc">
+                    The process of identifying, assessing, and controlling threats to an organization's capital and
+                    earnings. Strategies include: Avoid, Mitigate, Transfer, or Accept.
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">📜</span>
+                <h3 class="concept-title">Compliance Standards</h3>
+                <p class="concept-desc">
+                    Adhering to laws and regulations like <br><strong>GDPR</strong> (Data Privacy),
+                    <br><strong>HIPAA</strong> (Health Info), or <br><strong>PCI-DSS</strong> (Credit Card Security).
+                </p>
+            </div>
+            <div class="concept-card">
+                <span class="concept-icon">🕵️</span>
+                <h3 class="concept-title">Digital Forensics</h3>
+                <p class="concept-desc">
+                    The recovery and investigation of material found in digital devices, often related to computer
+                    crime, to
+                    collect evidence for legal proceedings.
+                </p>
+            </div>
+        </div>
+    </div> <!-- End of Concepts Tab -->
+
+    </div> <!-- End of Container -->
+
+    <script>
+        // Animation Manager: Overrides for cleanup
+        const _activeTimeouts = new Set();
+        const _activeIntervals = new Set();
+
+        const _nativeSetTimeout = window.setTimeout;
+        const _nativeSetInterval = window.setInterval;
+        const _nativeClearTimeout = window.clearTimeout;
+        const _nativeClearInterval = window.clearInterval;
+
+        window.setTimeout = function (callback, delay, ...args) {
+            const id = _nativeSetTimeout((...params) => {
+                _activeTimeouts.delete(id);
+                if (typeof callback === 'string') {
+                    // eslint-disable-next-line no-eval
+                    eval(callback);
+                } else {
+                    callback(...params);
+                }
+            }, delay, ...args);
+            _activeTimeouts.add(id);
+            return id;
+        };
+
+        window.clearTimeout = function (id) {
+            _activeTimeouts.delete(id);
+            _nativeClearTimeout(id);
+        };
+
+        window.setInterval = function (callback, delay, ...args) {
+            const id = _nativeSetInterval((...params) => {
+                if (typeof callback === 'string') {
+                    // eslint-disable-next-line no-eval
+                    eval(callback);
+                } else {
+                    callback(...params);
+                }
+            }, delay, ...args);
+            _activeIntervals.add(id);
+            return id;
+        };
+
+        window.clearInterval = function (id) {
+            _activeIntervals.delete(id);
+            _nativeClearInterval(id);
+        };
+
+        function clearAllAnimations() {
+            // Create arrays from sets to avoid modification during iteration issues
+            Array.from(_activeTimeouts).forEach(id => _nativeClearTimeout(id));
+            _activeTimeouts.clear();
+
+            Array.from(_activeIntervals).forEach(id => _nativeClearInterval(id));
+            _activeIntervals.clear();
+        }
+
+        let currentAnimation = null;
+
+        function startAttack(type) {
+            // Strictly clear ALL previous animations and pending tasks
+            clearAllAnimations();
+
+            // Show visualization area
+            document.getElementById('visualizationArea').classList.remove('hidden');
+
+            // Highlight active card
+            document.querySelectorAll('.attack-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            document.querySelector(`[data-attack="${type}"]`).classList.add('active');
+
+            // Scroll to visualization
+            document.getElementById('visualizationArea').scrollIntoView({ behavior: 'smooth' });
+
+            // Legacy cleanup (safe to keep)
+            if (currentAnimation) {
+                clearTimeout(currentAnimation);
+            }
+
+            const canvas = document.getElementById('animationCanvas');
+            canvas.innerHTML = '';
+
+            // Start appropriate attack animation
+            switch (type) {
+                case 'phishing':
+                    animatePhishing();
+                    break;
+                case 'ddos':
+                    animateDDoS();
+                    break;
+                case 'mitm':
+                    animateMITM();
+                    break;
+                case 'buffer':
+                    animateBufferOverflow();
+                    break;
+                case 'session':
+                    animateSessionHijacking();
+                    break;
+                case 'rainbow':
+                    animateRainbowTable();
+                    break;
+                case 'sql':
+                    animateSQL();
+                    break;
+                case 'ransomware':
+                    animateRansomware();
+                    break;
+                case 'xss':
+                    animateXSS();
+                    break;
+                case 'bruteforce':
+                    animateBruteForce();
+                    break;
+                case 'trojan':
+                    animateTrojan();
+                    break;
+                case 'arp':
+                    animateARP();
+                    break;
+                case 'keylogger':
+                    animateKeylogger();
+                    break;
+                case 'zeroday':
+                    animateZeroDay();
+                    break;
+                case 'botnet':
+                    animateBotnet();
+                    break;
+                case 'cryptojacking':
+                    animateCryptojacking();
+                    break;
+                case 'insider':
+                    animateInsiderThreat();
+                    break;
+                case 'dns':
+                    animateDNSSpoofing();
+                    break;
+            }
+        }
+
+        function animatePhishing() {
+            document.getElementById('vizTitle').textContent = '🎣 Phishing Attack in Action';
+            const canvas = document.getElementById('animationCanvas');
+
+            // Create nodes - adjusted positions to fit in canvas
+            const attacker = createNode('👾', 'attacker', 80, 50);
+            const victim = createNode('👤', 'victim', 320, 50);
+            const fakeServer = createNode('🏦', 'server', 200, 250);
+
+            canvas.appendChild(attacker);
+            canvas.appendChild(victim);
+            canvas.appendChild(fakeServer);
+
+            // Add labels
+            addLabel('Attacker', 80, 150);
+            addLabel('Victim', 320, 150);
+            addLabel('Fake Bank Site', 200, 340);
+
+            const steps = [
+                { text: "Attacker creates fake email pretending to be from a trusted source", delay: 500 },
+                { text: "Email contains urgent message with malicious link", delay: 2000 },
+                { text: "Victim clicks the link believing it's legitimate", delay: 4500 },
+                { text: "Fake login page captures username and password", delay: 7000 },
+                { text: "Credentials sent to attacker's server", delay: 9500 },
+                { text: "Attacker now has access to victim's account", delay: 12000 }
+            ];
+
+            showExplanation(
+                "How Phishing Works",
+                "Phishing is a social engineering attack where attackers impersonate trusted entities to trick victims into revealing sensitive information.",
+                steps
+            );
+
+            // Animate email sending with trail
+            setTimeout(() => {
+                animatePacketWithTrail(attacker, victim, '📧', 'malicious-flow', 1500);
+            }, 2000);
+
+            // Victim clicks and connects to fake site
+            setTimeout(() => {
+                victim.classList.add('warning-flash');
+                animatePacketWithTrail(victim, fakeServer, '🖱️', 'data-flow', 1200);
+            }, 4500);
+
+            // Typing animation
+            setTimeout(() => {
+                createTypingIndicator(fakeServer);
+            }, 6500);
+
+            // Credentials stolen
+            setTimeout(() => {
+                animatePacketWithTrail(fakeServer, attacker, '🔑', 'malicious-flow', 1500);
+
+                // Show stolen data floating up
+                setTimeout(() => {
+                    createDataBreach(victim, ['password123', 'user@email.com', '****-****-1234']);
+                }, 500);
+            }, 9500);
+
+            // Success indicator on attacker
+            setTimeout(() => {
+                attacker.style.animation = 'pulse 0.3s ease-in-out 3';
+                createExplosion(attacker, '#00ff88');
+            }, 11000);
+        }
+
+        function animateDDoS() {
+            document.getElementById('vizTitle').textContent = '💥 DDoS Attack in Action';
+            const canvas = document.getElementById('animationCanvas');
+
+            const server = createNode('🖥️', 'server', 210, 200);
+            canvas.appendChild(server);
+            addLabel('Target Server', 210, 295);
+
+            // Add shield initially
+            const shield = document.createElement('div');
+            shield.className = 'shield';
+            shield.style.left = '180px';
+            shield.style.top = '190px';
+            canvas.appendChild(shield);
+
+            // Create multiple attacker bots in a circle pattern - adjusted positions
+            const botPositions = [
+                [60, 80], [120, 250], [180, 380], [300, 380],
+                [360, 250], [360, 80], [240, 40], [120, 40]
+            ];
+
+            const bots = [];
+            botPositions.forEach((pos, idx) => {
+                setTimeout(() => {
+                    const bot = createNode('🤖', 'attacker', pos[1], pos[0]);
+                    canvas.appendChild(bot);
+                    bots.push(bot);
+                    addLabel(`Bot ${idx + 1}`, pos[1] + 10, pos[0] + 85);
+
+                    // Create network connection lines
+                    drawNetworkLine(bot, server);
+
+                    // Send continuous packets with trails
+                    const interval = setInterval(() => {
+                        if (canvas.contains(bot)) {
+                            animatePacketWithTrail(bot, server, '📦', 'malicious-flow', 400);
+                        } else {
+                            clearInterval(interval);
+                        }
+                    }, 200 + idx * 50);
+                }, idx * 400);
+            });
+
+            // Shield breaks
+            setTimeout(() => {
+                shield.style.animation = 'warningFlash 0.3s ease-in-out 3';
+                setTimeout(() => {
+                    createExplosion(server, '#ff0055');
+                    shield.remove();
+                }, 1000);
+            }, 4000);
+
+            // Server overload animation with multiple effects
+            setTimeout(() => {
+                server.style.animation = 'pulse 0.2s ease-in-out infinite';
+                server.style.borderColor = '#ff0055';
+                server.style.boxShadow = '0 0 50px var(--glow-red)';
+
+                // Create cracks around server
+                for (let i = 0; i < 8; i++) {
+                    setTimeout(() => {
+                        createCrack(server, i * 45);
+                    }, i * 100);
+                }
+
+                // Error messages floating up
+                setInterval(() => {
+                    createDataBreach(server, ['ERROR 503', 'OVERLOAD', 'TIMEOUT']);
+                }, 800);
+            }, 5500);
+
+            // Final explosion
+            setTimeout(() => {
+                server.textContent = '💥';
+                createExplosion(server, '#ff0055', 150);
+                server.style.animation = 'explode 1s ease-out';
+            }, 9000);
+
+            const steps = [
+                { text: "Attacker controls a botnet of compromised computers", delay: 500 },
+                { text: "Bots establish connections to target server", delay: 2000 },
+                { text: "Massive coordinated flood of requests begins", delay: 4000 },
+                { text: "Server's protection mechanisms overwhelmed", delay: 6000 },
+                { text: "Resources exhausted - CPU, memory, bandwidth maxed", delay: 8000 },
+                { text: "Server crashes - service completely unavailable", delay: 10000 }
+            ];
+
+            showExplanation(
+                "How DDoS Works",
+                "Distributed Denial of Service attacks overwhelm a target with traffic from multiple sources, making the service unavailable to legitimate users.",
+                steps
+            );
+        }
+
+        function animateMITM() {
+            document.getElementById('vizTitle').textContent = '👤 Man-in-the-Middle Attack';
+            const canvas = document.getElementById('animationCanvas');
+
+            const user = createNode('👤', 'victim', 100, 50);
+            const attacker = createNode('👾', 'attacker', 200, 200);
+            const server = createNode('🖥️', 'server', 100, 350);
+
+            canvas.appendChild(user);
+            canvas.appendChild(attacker);
+            canvas.appendChild(server);
+
+            addLabel('User', 100, 140);
+            addLabel('Attacker (Interceptor)', 200, 290);
+            addLabel('Server', 100, 440);
+
+            // Draw network lines showing interception
+            setTimeout(() => {
+                drawNetworkLine(user, attacker);
+                drawNetworkLine(attacker, server);
+            }, 1000);
+
+            const steps = [
+                { text: "User attempts to connect to secure server", delay: 500 },
+                { text: "Attacker intercepts the connection request", delay: 2500 },
+                { text: "Attacker relays communication, posing as both parties", delay: 5000 },
+                { text: "All data passes through attacker's system", delay: 7500 },
+                { text: "Attacker reads, copies, and potentially modifies data", delay: 10000 },
+                { text: "Both parties completely unaware of interception", delay: 12500 }
+            ];
+
+            showExplanation(
+                "How MITM Works",
+                "Attackers position themselves between two communicating parties, intercepting and potentially altering data without either party knowing.",
+                steps
+            );
+
+            // Animate intercepted communication cycle
+            function communicationCycle(startTime) {
+                // User sends to attacker
+                setTimeout(() => {
+                    animatePacketWithTrail(user, attacker, '📨', 'data-flow', 800);
+                }, startTime);
+
+                // Attacker processes and reads
+                setTimeout(() => {
+                    attacker.classList.add('warning-flash');
+                    createTypingIndicator(attacker, 500);
+
+                    // Show stolen data
+                    createDataBreach(attacker, ['Reading...', 'Copying...']);
+                }, startTime + 900);
+
+                // Attacker forwards to server (modified)
+                setTimeout(() => {
+                    animatePacketWithTrail(attacker, server, '📨', 'malicious-flow', 800);
+                }, startTime + 1500);
+
+                // Server responds
+                setTimeout(() => {
+                    animatePacketWithTrail(server, attacker, '📬', 'data-flow', 800);
+                }, startTime + 3000);
+
+                // Attacker intercepts response
+                setTimeout(() => {
+                    attacker.classList.add('warning-flash');
+                    createDataBreach(attacker, ['Intercepted!', 'Modified!']);
+                }, startTime + 3900);
+
+                // Forward to user
+                setTimeout(() => {
+                    animatePacketWithTrail(attacker, user, '📬', 'malicious-flow', 800);
+                }, startTime + 4500);
+            }
+
+            // Run multiple communication cycles
+            communicationCycle(2000);
+            communicationCycle(7000);
+            communicationCycle(11000);
+        }
+
+        function animateSQL() {
+            document.getElementById('vizTitle').textContent = '💉 SQL Injection Attack';
+            const canvas = document.getElementById('animationCanvas');
+
+            const attacker = createNode('👾', 'attacker', 80, 50);
+            const webapp = createNode('🌐', 'victim', 200, 200);
+            const database = createNode('🗄️', 'server', 80, 350);
+
+            canvas.appendChild(attacker);
+            canvas.appendChild(webapp);
+            canvas.appendChild(database);
+
+            addLabel('Attacker', 80, 140);
+            addLabel('Web Application', 200, 290);
+            addLabel('Database', 80, 440);
+
+            const steps = [
+                { text: "Attacker finds input field vulnerable to SQL injection", delay: 500 },
+                { text: "Malicious SQL code entered into login form", delay: 2500 },
+                { text: "Application fails to sanitize the input", delay: 5000 },
+                { text: "Injected code executed directly against database", delay: 7500 },
+                { text: "Database returns sensitive information", delay: 10000 },
+                { text: "Attacker gains unauthorized access to all data", delay: 12500 }
+            ];
+
+            showExplanation(
+                "How SQL Injection Works",
+                "SQL injection exploits poor input validation, allowing attackers to inject malicious SQL commands that manipulate database queries.",
+                steps
+            );
+
+            // Attacker types malicious code
+            setTimeout(() => {
+                createTypingIndicator(attacker, 1500);
+            }, 1000);
+
+            // Send malicious SQL injection
+            setTimeout(() => {
+                animatePacketWithTrail(attacker, webapp, '💉', 'malicious-flow', 1000);
+
+                // Show SQL code scrolling
+                setTimeout(() => {
+                    for (let i = 0; i < 5; i++) {
+                        setTimeout(() => {
+                            createCodeInjection(webapp, "' OR '1'='1", i * 30);
+                        }, i * 200);
+                    }
+                }, 500);
+            }, 2500);
+
+            // Web app processes (vulnerable)
+            setTimeout(() => {
+                webapp.classList.add('warning-flash');
+                createExplosion(webapp, '#ffd700', 80);
+            }, 4000);
+
+            // Malicious query sent to database
+            setTimeout(() => {
+                animatePacketWithTrail(webapp, database, '⚠️', 'malicious-flow', 1000);
+
+                // Show SQL command
+                setTimeout(() => {
+                    createCodeInjection(database, 'SELECT * FROM users', 0);
+                }, 500);
+            }, 5000);
+
+            // Database processes query
+            setTimeout(() => {
+                database.classList.add('warning-flash');
+                createTypingIndicator(database, 1000);
+            }, 6500);
+
+            // Sensitive data returned
+            setTimeout(() => {
+                animatePacketWithTrail(database, webapp, '📊', 'malicious-flow', 1000);
+            }, 8000);
+
+            // Data forwarded to attacker
+            setTimeout(() => {
+                animatePacketWithTrail(webapp, attacker, '📊', 'malicious-flow', 1000);
+
+                // Show stolen data
+                setTimeout(() => {
+                    createDataBreach(attacker, ['users table', 'passwords', 'credit cards', 'admin access']);
+                    attacker.style.animation = 'pulse 0.3s ease-in-out 3';
+                }, 500);
+            }, 9500);
+        }
+
+        function animateRansomware() {
+            document.getElementById('vizTitle').textContent = '🔒 Ransomware Attack';
+            const canvas = document.getElementById('animationCanvas');
+
+            // Reposition nodes to be side-by-side to prevent overlap
+            const victim = createNode('👤', 'victim', 200, 150);
+            const computer = createNode('💻', 'server', 200, 450);
+
+            canvas.appendChild(victim);
+            canvas.appendChild(computer);
+
+            // Labels placed underneath the nodes
+            addLabel('Victim', 290, 160);
+            addLabel('Computer', 290, 450);
+
+            // Create file icons around computer in a circle, avoiding overlap
+            // Computer is at (left: 450, top: 200)
+            const filePositions = [
+                [390, 140], // Top-Left
+                [470, 120], // Top
+                [550, 140], // Top-Right
+                [570, 220], // Right
+                [550, 300], // Bottom-Right
+                [470, 320], // Bottom
+                [390, 300]  // Bottom-Left
+            ];
+
+            const files = [];
+
+            filePositions.forEach((pos, idx) => {
+                setTimeout(() => {
+                    const file = createNode('📄', 'victim', pos[1], pos[0]);
+                    file.style.width = '40px';
+                    file.style.height = '40px';
+                    file.style.fontSize = '1.5rem';
+                    canvas.appendChild(file);
+                    files.push(file);
+                }, idx * 200);
+            });
+
+            const steps = [
+                { text: "Victim downloads infected file or clicks malicious link", delay: 500 },
+                { text: "Ransomware silently installs on the system", delay: 2500 },
+                { text: "Malware begins encrypting files in background", delay: 5000 },
+                { text: "Files locked one by one with military-grade encryption", delay: 7500 },
+                { text: "All important files encrypted and inaccessible", delay: 10000 },
+                { text: "Ransom note displayed demanding cryptocurrency payment", delay: 12500 }
+            ];
+
+            showExplanation(
+                "How Ransomware Works",
+                "Ransomware encrypts victim's files and demands payment for the decryption key, effectively holding data hostage.",
+                steps
+            );
+
+            // Victim downloads malicious file
+            setTimeout(() => {
+                animatePacketWithTrail(victim, computer, '🦠', 'malicious-flow', 1000);
+            }, 1500);
+
+            // Malware installs
+            setTimeout(() => {
+                computer.classList.add('warning-flash');
+                createExplosion(computer, '#ff0055', 100);
+            }, 3000);
+
+            // Files start getting encrypted one by one
+            setTimeout(() => {
+                files.forEach((file, idx) => {
+                    setTimeout(() => {
+                        // Show encryption effect
+                        file.classList.add('lock-animation');
+                        createExplosion(file, '#ff0055', 50);
+
+                        setTimeout(() => {
+                            file.textContent = '🔒';
+                            file.style.borderColor = '#ff0055';
+                            file.style.boxShadow = '0 0 20px var(--glow-red)';
+                        }, 300);
+                    }, idx * 600);
+                });
+            }, 5000);
+
+            // Computer fully infected
+            setTimeout(() => {
+                computer.textContent = '🔒';
+                computer.style.animation = 'pulse 0.5s ease-in-out infinite';
+                computer.style.borderColor = '#ff0055';
+            }, 9000);
+
+            // Ransom note appears
+            setTimeout(() => {
+                const ransom = document.createElement('div');
+                ransom.style.position = 'absolute';
+                ransom.style.top = '380px';
+                ransom.style.left = '50%';
+                ransom.style.transform = 'translateX(-50%)';
+                ransom.style.background = '#ff0055';
+                ransom.style.color = 'white';
+                ransom.style.fontSize = '1.1rem';
+                ransom.style.padding = '15px 20px';
+                ransom.style.borderRadius = '10px';
+                ransom.style.border = '3px solid white';
+                ransom.style.fontFamily = "'Orbitron', sans-serif";
+                ransom.style.textAlign = 'center';
+                ransom.style.animation = 'pulse 1s ease-in-out infinite';
+                ransom.style.zIndex = '20';
+                ransom.style.width = 'max-content';
+                ransom.innerHTML = '💰 YOUR FILES ARE ENCRYPTED!<br>Pay 0.5 BTC in 48 hours<br>⏰ Time remaining: 47:59:32';
+                canvas.appendChild(ransom);
+
+                createExplosion(ransom, '#ff0055', 150);
+            }, 12000);
+        }
+
+        function animateXSS() {
+            document.getElementById('vizTitle').textContent = '⚡ Cross-Site Scripting Attack';
+            const canvas = document.getElementById('animationCanvas');
+
+            const attacker = createNode('👾', 'attacker', 80, 50);
+            const website = createNode('🌐', 'server', 200, 200);
+            const victim = createNode('👤', 'victim', 80, 350);
+
+            canvas.appendChild(attacker);
+            canvas.appendChild(website);
+            canvas.appendChild(victim);
+
+            addLabel('Attacker', 80, 140);
+            addLabel('Vulnerable Website', 200, 290);
+            addLabel('Victim', 80, 440);
+
+            const steps = [
+                { text: "Attacker finds website that doesn't sanitize user input", delay: 500 },
+                { text: "Malicious JavaScript injected into comment or form", delay: 2500 },
+                { text: "Script stored in website's database", delay: 5000 },
+                { text: "Victim visits page containing the malicious script", delay: 7500 },
+                { text: "Script executes automatically in victim's browser", delay: 10000 },
+                { text: "Cookies, session tokens stolen and sent to attacker", delay: 12500 }
+            ];
+
+            showExplanation(
+                "How XSS Works",
+                "Cross-Site Scripting allows attackers to inject malicious scripts into trusted websites, which then execute in victims' browsers.",
+                steps
+            );
+
+            // Attacker injects script
+            setTimeout(() => {
+                createTypingIndicator(attacker, 1000);
+            }, 1000);
+
+            setTimeout(() => {
+                animatePacketWithTrail(attacker, website, '⚡', 'malicious-flow', 1000);
+
+                // Show code injection
+                setTimeout(() => {
+                    for (let i = 0; i < 4; i++) {
+                        setTimeout(() => {
+                            createCodeInjection(website, '&lt;script&gt;steal()&lt;/script&gt;', i * 25);
+                        }, i * 200);
+                    }
+                }, 500);
+            }, 2500);
+
+            // Script stored
+            setTimeout(() => {
+                website.classList.add('warning-flash');
+                createExplosion(website, '#ffd700', 80);
+            }, 4500);
+
+            // Victim visits site
+            setTimeout(() => {
+                animatePacketWithTrail(victim, website, '👁️', 'data-flow', 1000);
+            }, 7500);
+
+            // Malicious script executes
+            setTimeout(() => {
+                animatePacketWithTrail(website, victim, '⚡', 'malicious-flow', 1000);
+
+                setTimeout(() => {
+                    victim.classList.add('warning-flash');
+                    createExplosion(victim, '#ff0055', 80);
+                }, 1000);
+            }, 9500);
+
+            // Cookies stolen
+            setTimeout(() => {
+                animatePacketWithTrail(victim, attacker, '🍪', 'malicious-flow', 1200);
+
+                setTimeout(() => {
+                    createDataBreach(attacker, ['session_id', 'auth_token', 'user_data']);
+                    attacker.style.animation = 'pulse 0.3s ease-in-out 3';
+                }, 1200);
+            }, 12000);
+        }
+
+        function animateBruteForce() {
+            document.getElementById('vizTitle').textContent = '🔨 Brute Force Attack';
+            const canvas = document.getElementById('animationCanvas');
+
+            const attacker = createNode('👾', 'attacker', 200, 80);
+            const server = createNode('🔐', 'server', 200, 320);
+
+            canvas.appendChild(attacker);
+            canvas.appendChild(server);
+
+            addLabel('Attacker', 200, 170);
+            addLabel('Login Server', 200, 410);
+
+            const steps = [
+                { text: "Attacker targets login page or authentication system", delay: 500 },
+                { text: "Automated tool begins trying password combinations", delay: 2000 },
+                { text: "Thousands of login attempts per minute", delay: 4000 },
+                { text: "Server checks each password against stored hash", delay: 6000 },
+                { text: "Eventually correct password is found", delay: 8000 },
+                { text: "Attacker gains unauthorized access to account", delay: 10000 }
+            ];
+
+            showExplanation(
+                "How Brute Force Works",
+                "Brute force attacks systematically try every possible password combination until finding the correct one, exploiting weak passwords.",
+                steps
+            );
+
+            // Rapid fire password attempts
+            const passwords = ['admin123', '12345678', 'qwerty', 'password', 'letmein', 'Welcome1'];
+            let attemptCount = 0;
+
+            const attemptInterval = setInterval(() => {
+                if (attemptCount < 20) {
+                    const pwd = passwords[attemptCount % passwords.length];
+                    animatePacketWithTrail(attacker, server, '🔑', 'malicious-flow', 300);
+
+                    // Show attempt
+                    setTimeout(() => {
+                        const attempt = document.createElement('div');
+                        attempt.className = 'data-breach';
+                        attempt.textContent = `Trying: ${pwd}`;
+                        attempt.style.left = '250px';
+                        attempt.style.top = '230px';
+                        canvas.appendChild(attempt);
+                    }, 150);
+
+                    // Failed attempts
+                    if (attemptCount < 19) {
+                        setTimeout(() => {
+                            server.style.borderColor = '#ff0055';
+                            setTimeout(() => {
+                                server.style.borderColor = '#00ff88';
+                            }, 100);
+                        }, 300);
+                    }
+
+                    attemptCount++;
+                } else {
+                    clearInterval(attemptInterval);
+
+                    // Success!
+                    setTimeout(() => {
+                        server.style.borderColor = '#00ff88';
+                        server.textContent = '🔓';
+                        createExplosion(server, '#00ff88', 120);
+
+                        const success = document.createElement('div');
+                        success.style.position = 'absolute';
+                        success.style.top = '420px';
+                        success.style.left = '150px';
+                        success.style.color = '#00ff88';
+                        success.style.fontSize = '1.2rem';
+                        success.style.fontFamily = "'Orbitron', sans-serif";
+                        success.style.animation = 'pulse 0.5s ease-in-out 3';
+                        success.textContent = '✓ ACCESS GRANTED';
+                        canvas.appendChild(success);
+                    }, 500);
+                }
+            }, 400);
+        }
+
+        function animateTrojan() {
+            document.getElementById('vizTitle').textContent = '🐴 Trojan Horse Attack';
+            const canvas = document.getElementById('animationCanvas');
+
+            const attacker = createNode('👾', 'attacker', 320, 80);
+            const victim = createNode('👤', 'victim', 80, 200);
+            const computer = createNode('💻', 'server', 320, 320);
+
+            canvas.appendChild(attacker);
+            canvas.appendChild(victim);
+            canvas.appendChild(computer);
+
+            addLabel('Attacker', 320, 170);
+            addLabel('Victim', 80, 290);
+            addLabel('Infected Computer', 320, 410);
+
+            const steps = [
+                { text: "Attacker creates malware disguised as legitimate software", delay: 500 },
+                { text: "Victim downloads seemingly harmless application", delay: 3000 },
+                { text: "Trojan installs hidden backdoor along with real program", delay: 5500 },
+                { text: "Backdoor opens connection to attacker's server", delay: 8000 },
+                { text: "Attacker gains remote control of the system", delay: 10500 },
+                { text: "Sensitive data exfiltrated without victim's knowledge", delay: 13000 }
+            ];
+
+            showExplanation(
+                "How Trojan Horse Works",
+                "Trojans disguise themselves as legitimate software to trick users into installation, providing attackers with backdoor access.",
+                steps
+            );
+
+            // Victim downloads "legitimate" software
+            setTimeout(() => {
+                const gift = createNode('🎁', 'server', 200, 200);
+                gift.style.width = '60px';
+                gift.style.height = '60px';
+                gift.style.fontSize = '2.5rem';
+                canvas.appendChild(gift);
+                addLabel('Free Game.exe', 200, 270);
+
+                setTimeout(() => {
+                    animatePacketWithTrail(gift, victim, '📦', 'data-flow', 1500);
+                }, 1000);
+            }, 2000);
+
+            // Installation
+            setTimeout(() => {
+                victim.classList.add('warning-flash');
+                createTypingIndicator(victim, 1500);
+            }, 4500);
+
+            // Trojan reveals itself
+            setTimeout(() => {
+                animatePacketWithTrail(victim, computer, '🐴', 'malicious-flow', 1000);
+
+                setTimeout(() => {
+                    computer.classList.add('warning-flash');
+                    createExplosion(computer, '#ff0055', 100);
+                }, 1000);
+            }, 6500);
+
+            // Backdoor connection established
+            setTimeout(() => {
+                drawNetworkLine(computer, attacker);
+
+                setTimeout(() => {
+                    animatePacketWithTrail(computer, attacker, '🔓', 'malicious-flow', 1200);
+                }, 500);
+            }, 8500);
+
+            // Continuous data theft
+            setTimeout(() => {
+                setInterval(() => {
+                    if (canvas.contains(computer)) {
+                        animatePacketWithTrail(computer, attacker, '📂', 'malicious-flow', 800);
+                        createDataBreach(attacker, ['files', 'passwords', 'photos']);
+                    }
+                }, 2000);
+            }, 11000);
+        }
+
+        function animateARP() {
+            document.getElementById('vizTitle').textContent = '🔀 ARP Spoofing Attack';
+            const canvas = document.getElementById('animationCanvas');
+
+            const router = createNode('📡', 'server', 200, 80);
+            const victim = createNode('👤', 'victim', 100, 280);
+            const attacker = createNode('👾', 'attacker', 300, 280);
+
+            canvas.appendChild(router);
+            canvas.appendChild(victim);
+            canvas.appendChild(attacker);
+
+            addLabel('Router/Gateway', 200, 170);
+            addLabel('Victim', 100, 370);
+            addLabel('Attacker', 300, 370);
+
+            const steps = [
+                { text: "All devices on network communicate with router normally", delay: 500 },
+                { text: "Attacker sends fake ARP messages to the network", delay: 2500 },
+                { text: "Victim's ARP cache poisoned with attacker's MAC address", delay: 5000 },
+                { text: "Victim now sends traffic to attacker instead of router", delay: 7500 },
+                { text: "Attacker intercepts, reads, and forwards traffic", delay: 10000 },
+                { text: "Complete man-in-the-middle position established", delay: 12500 }
+            ];
+
+            showExplanation(
+                "How ARP Spoofing Works",
+                "ARP spoofing sends fake address resolution protocol messages to link attacker's MAC address with another device's IP address.",
+                steps
+            );
+
+            // Normal communication first
+            setTimeout(() => {
+                drawNetworkLine(victim, router);
+                animatePacketWithTrail(victim, router, '📨', 'data-flow', 800);
+            }, 1000);
+
+            // Attacker sends fake ARP
+            setTimeout(() => {
+                for (let i = 0; i < 5; i++) {
+                    setTimeout(() => {
+                        animatePacketWithTrail(attacker, victim, '🔀', 'malicious-flow', 600);
+                        createCodeInjection(attacker, 'ARP: 192.168.1.1 = ATTACKER_MAC', i * 20);
+                    }, i * 400);
+                }
+            }, 3000);
+
+            // Cache poisoned
+            setTimeout(() => {
+                victim.classList.add('warning-flash');
+                createExplosion(victim, '#ffd700', 80);
+            }, 5500);
+
+            // Traffic now goes through attacker
+            setTimeout(() => {
+                drawNetworkLine(victim, attacker);
+                drawNetworkLine(attacker, router);
+
+                // Intercepted communication cycle
+                setInterval(() => {
+                    if (canvas.contains(victim)) {
+                        animatePacketWithTrail(victim, attacker, '📨', 'data-flow', 600);
+                        setTimeout(() => {
+                            attacker.classList.add('warning-flash');
+                            animatePacketWithTrail(attacker, router, '📨', 'malicious-flow', 600);
+                        }, 700);
+                    }
+                }, 3000);
+            }, 8000);
+        }
+
+        function animateKeylogger() {
+            document.getElementById('vizTitle').textContent = '⌨️ Keylogger Attack';
+            const canvas = document.getElementById('animationCanvas');
+
+            const victim = createNode('👤', 'victim', 80, 80);
+            const computer = createNode('💻', 'server', 200, 200);
+            const attacker = createNode('👾', 'attacker', 320, 320);
+
+            canvas.appendChild(victim);
+            canvas.appendChild(computer);
+            canvas.appendChild(attacker);
+
+            addLabel('Victim Typing', 80, 170);
+            addLabel('Infected Computer', 200, 290);
+            addLabel('Attacker Receiving', 320, 410);
+
+            const steps = [
+                { text: "Keylogger malware installed on victim's computer", delay: 500 },
+                { text: "Software runs silently in background, undetected", delay: 2500 },
+                { text: "Every keystroke is captured and logged", delay: 5000 },
+                { text: "Passwords, messages, credit cards all recorded", delay: 7500 },
+                { text: "Logs sent periodically to attacker's server", delay: 10000 },
+                { text: "Attacker has complete record of all typing activity", delay: 12500 }
+            ];
+
+            showExplanation(
+                "How Keylogger Works",
+                "Keyloggers secretly record every keystroke, capturing sensitive information like passwords and credit card numbers.",
+                steps
+            );
+
+            // Show typing activity
+            const keystrokes = ['p', 'a', 's', 's', 'w', 'o', 'r', 'd', '1', '2', '3'];
+
+            setTimeout(() => {
+                createTypingIndicator(victim, 4000);
+
+                keystrokes.forEach((key, idx) => {
+                    setTimeout(() => {
+                        // Show keystroke
+                        const keystroke = document.createElement('div');
+                        keystroke.className = 'packet';
+                        keystroke.textContent = key;
+                        keystroke.style.left = '130px';
+                        keystroke.style.top = '150px';
+                        keystroke.style.background = '#00d9ff';
+                        keystroke.style.fontSize = '1rem';
+                        keystroke.style.width = '30px';
+                        keystroke.style.height = '30px';
+                        keystroke.style.display = 'flex';
+                        keystroke.style.alignItems = 'center';
+                        keystroke.style.justifyContent = 'center';
+                        canvas.appendChild(keystroke);
+
+                        // Animate to computer
+                        setTimeout(() => {
+                            const rect = computer.getBoundingClientRect();
+                            const canvasRect = canvas.getBoundingClientRect();
+                            keystroke.animate([
+                                { left: '130px', top: '150px' },
+                                { left: (rect.left - canvasRect.left + 40) + 'px', top: (rect.top - canvasRect.top + 40) + 'px' }
+                            ], {
+                                duration: 500,
+                                easing: 'ease-out'
+                            }).onfinish = () => keystroke.remove();
+                        }, 100);
+                    }, idx * 300);
+                });
+            }, 2000);
+
+            // Computer logs keystrokes
+            setTimeout(() => {
+                computer.classList.add('warning-flash');
+                createCodeInjection(computer, 'LOG: password123', 0);
+            }, 6000);
+
+            // Send log to attacker
+            setTimeout(() => {
+                drawNetworkLine(computer, attacker);
+
+                setTimeout(() => {
+                    animatePacketWithTrail(computer, attacker, '📝', 'malicious-flow', 1200);
+
+                    setTimeout(() => {
+                        createDataBreach(attacker, ['password123', 'credit: 4532...', 'email: user@...']);
+                        attacker.style.animation = 'pulse 0.3s ease-in-out 3';
+                    }, 1300);
+                }, 500);
+            }, 8000);
+
+            // Continuous logging
+            setTimeout(() => {
+                setInterval(() => {
+                    if (canvas.contains(computer)) {
+                        animatePacketWithTrail(computer, attacker, '📝', 'malicious-flow', 800);
+                    }
+                }, 3000);
+            }, 11000);
+        }
+
+        function animateZeroDay() {
+            document.getElementById('vizTitle').textContent = '💀 Zero-Day Exploit Attack';
+            const canvas = document.getElementById('animationCanvas');
+
+            const software = createNode('📦', 'server', 200, 100);
+            const attacker = createNode('👾', 'attacker', 80, 250);
+            const victim = createNode('👤', 'victim', 320, 250);
+
+            canvas.appendChild(software);
+            canvas.appendChild(attacker);
+            canvas.appendChild(victim);
+
+            addLabel('Vulnerable Software', 200, 190);
+            addLabel('Attacker', 80, 340);
+            addLabel('Victim', 320, 340);
+
+            const steps = [
+                { text: "Attacker discovers unknown vulnerability in software", delay: 500 },
+                { text: "Vulnerability is unknown to developers and security community", delay: 3000 },
+                { text: "No patch or defense exists - hence 'zero-day'", delay: 5500 },
+                { text: "Attacker crafts exploit to take advantage of flaw", delay: 8000 },
+                { text: "Exploit deployed against unsuspecting victims", delay: 10500 },
+                { text: "Complete system compromise before anyone can defend", delay: 13000 }
+            ];
+
+            showExplanation(
+                "How Zero-Day Exploit Works",
+                "Zero-day exploits take advantage of unknown security vulnerabilities, leaving no time for developers to create patches.",
+                steps
+            );
+
+            // Attacker discovers vulnerability
+            setTimeout(() => {
+                createTypingIndicator(attacker, 2000);
+
+                setTimeout(() => {
+                    animatePacketWithTrail(attacker, software, '🔍', 'malicious-flow', 1000);
+                }, 1000);
+            }, 1500);
+
+            // Vulnerability found
+            setTimeout(() => {
+                software.classList.add('warning-flash');
+                createExplosion(software, '#ffd700', 100);
+
+                // Show crack in software
+                for (let i = 0; i < 6; i++) {
+                    setTimeout(() => {
+                        createCrack(software, i * 60);
+                    }, i * 150);
+                }
+            }, 4000);
+
+            // Craft exploit
+            setTimeout(() => {
+                for (let i = 0; i < 4; i++) {
+                    setTimeout(() => {
+                        createCodeInjection(attacker, 'exploit_code();', i * 25);
+                    }, i * 300);
+                }
+            }, 7000);
+
+            // Launch attack
+            setTimeout(() => {
+                animatePacketWithTrail(attacker, victim, '💀', 'malicious-flow', 1500);
+            }, 10000);
+
+            // Victim compromised
+            setTimeout(() => {
+                victim.classList.add('warning-flash');
+                createExplosion(victim, '#ff0055', 120);
+
+                setTimeout(() => {
+                    victim.textContent = '💥';
+                    victim.style.borderColor = '#ff0055';
+
+                    // Show breach
+                    createDataBreach(victim, ['SYSTEM COMPROMISED', 'ROOT ACCESS', 'ALL DATA EXPOSED']);
+                }, 500);
+            }, 12000);
+        }
+
+        function animateBotnet() {
+            document.getElementById('vizTitle').textContent = '🕸️ Botnet Creation & Control';
+            const canvas = document.getElementById('animationCanvas');
+
+            const attacker = createNode('👾', 'attacker', 230, 60);
+            const commandServer = createNode('🖥️', 'server', 230, 380);
+
+            canvas.appendChild(attacker);
+            canvas.appendChild(commandServer);
+
+            addLabel('Attacker (Botmaster)', 230, 155);
+            addLabel('Command & Control Server', 230, 465);
+
+            // Create victim computers in a circle - adjusted positions
+            const victimPositions = [
+                [60, 150], [60, 280], [160, 360],
+                [280, 360], [380, 280], [380, 150]
+            ];
+
+            const bots = [];
+
+            const steps = [
+                { text: "Attacker infects multiple computers with malware", delay: 500 },
+                { text: "Infected machines become 'bots' or 'zombies'", delay: 3000 },
+                { text: "Bots connect back to command & control server", delay: 5500 },
+                { text: "Attacker can remotely control entire botnet", delay: 8000 },
+                { text: "Botnet used for DDoS, spam, mining, or attacks", delay: 10500 },
+                { text: "Owners unaware their computers are compromised", delay: 13000 }
+            ];
+
+            showExplanation(
+                "How Botnets Work",
+                "Botnets are networks of infected computers controlled remotely to perform coordinated attacks, send spam, or mine cryptocurrency.",
+                steps
+            );
+
+            // Infect computers one by one
+            victimPositions.forEach((pos, idx) => {
+                setTimeout(() => {
+                    const bot = createNode('💻', 'victim', pos[1], pos[0]);
+                    canvas.appendChild(bot);
+                    addLabel(`Computer ${idx + 1}`, pos[1] + 10, pos[0] + 85);
+
+                    // Send infection
+                    animatePacketWithTrail(attacker, bot, '🦠', 'malicious-flow', 800);
+
+                    setTimeout(() => {
+                        bot.classList.add('warning-flash');
+                        createExplosion(bot, '#ff0055', 60);
+
+                        // Transform to zombie
+                        setTimeout(() => {
+                            bot.textContent = '🧟';
+                            bot.classList.remove('victim');
+                            bot.classList.add('attacker');
+                            bots.push(bot);
+                        }, 500);
+                    }, 900);
+                }, idx * 1500);
+            });
+
+            // Bots connect to C&C server
+            setTimeout(() => {
+                bots.forEach((bot, idx) => {
+                    setTimeout(() => {
+                        drawNetworkLine(bot, commandServer);
+                        animatePacketWithTrail(bot, commandServer, '📡', 'malicious-flow', 800);
+                    }, idx * 300);
+                });
+            }, 10000);
+
+            // Command sent from attacker through C&C to all bots
+            setTimeout(() => {
+                animatePacketWithTrail(attacker, commandServer, '📢', 'malicious-flow', 600);
+
+                setTimeout(() => {
+                    commandServer.style.animation = 'pulse 0.3s ease-in-out 3';
+
+                    setTimeout(() => {
+                        bots.forEach((bot, idx) => {
+                            setTimeout(() => {
+                                animatePacketWithTrail(commandServer, bot, '⚡', 'malicious-flow', 600);
+
+                                setTimeout(() => {
+                                    bot.style.animation = 'pulse 0.3s ease-in-out 3';
+                                }, 700);
+                            }, idx * 200);
+                        });
+                    }, 500);
+                }, 700);
+            }, 13000);
+        }
+
+        function animateCryptojacking() {
+            document.getElementById('vizTitle').textContent = '⛏️ Cryptojacking Attack';
+            const canvas = document.getElementById('animationCanvas');
+
+            const attacker = createNode('👾', 'attacker', 80, 50);
+            const website = createNode('🌐', 'server', 200, 200);
+            const victim = createNode('💻', 'victim', 80, 350);
+
+            canvas.appendChild(attacker);
+            canvas.appendChild(website);
+            canvas.appendChild(victim);
+
+            addLabel('Attacker', 80, 140);
+            addLabel('Compromised Website', 200, 290);
+            addLabel('Victim PC', 80, 440);
+
+            const steps = [
+                { text: "Attacker injects mining script into a website", delay: 500 },
+                { text: "Victim visits the compromised website", delay: 2500 },
+                { text: "Mining script executes in victim's browser background", delay: 4500 },
+                { text: "Victim's CPU usage spikes to 100% processing math problems", delay: 7000 },
+                { text: "New cryptocurrency coins are generated", delay: 9500 },
+                { text: "Profits sent directly to attacker's wallet", delay: 12000 }
+            ];
+
+            showExplanation(
+                "How Cryptojacking Works",
+                "Cryptojacking involves hijacking a victim's processing power to mine cryptocurrency, often via malicious scripts on websites.",
+                steps
+            );
+
+            // Attacker injects script
+            setTimeout(() => {
+                animatePacketWithTrail(attacker, website, '⛏️', 'malicious-flow', 1000);
+            }, 1000);
+
+            // Victim visits site
+            setTimeout(() => {
+                animatePacketWithTrail(victim, website, '👀', 'data-flow', 1000);
+            }, 3000);
+
+            // Script runs on victim
+            setTimeout(() => {
+                animatePacketWithTrail(website, victim, '📜', 'malicious-flow', 1000);
+
+                setTimeout(() => {
+                    victim.classList.add('warning-flash');
+
+                    // Show CPU spike
+                    const cpuLabel = document.createElement('div');
+                    cpuLabel.className = 'data-breach';
+                    cpuLabel.textContent = "CPU: 100%";
+                    cpuLabel.style.color = '#ff0055';
+                    cpuLabel.style.fontWeight = 'bold';
+
+                    const rect = victim.getBoundingClientRect();
+                    const canvasRect = canvas.getBoundingClientRect();
+                    cpuLabel.style.left = (rect.left - canvasRect.left) + 'px';
+                    cpuLabel.style.top = (rect.top - canvasRect.top - 30) + 'px';
+
+                    canvas.appendChild(cpuLabel);
+
+                    // Add overheating effect
+                    victim.style.animation = 'pulse 0.2s ease-in-out infinite';
+                    victim.style.boxShadow = '0 0 30px var(--accent-red)';
+                }, 1200);
+            }, 5000);
+
+            // Mining happens
+            setTimeout(() => {
+                setInterval(() => {
+                    if (canvas.contains(victim)) {
+                        createCodeInjection(victim, 'Hash calculation...', -20);
+                    }
+                }, 1000);
+            }, 7000);
+
+            // Coins back to attacker
+            setTimeout(() => {
+                const coinInterval = setInterval(() => {
+                    if (canvas.contains(victim)) {
+                        animatePacketWithTrail(victim, attacker, '💰', 'malicious-flow', 1500);
+                    } else {
+                        clearInterval(coinInterval);
+                    }
+                }, 2000);
+            }, 9000);
+        }
+
+        function animateInsiderThreat() {
+            document.getElementById('vizTitle').textContent = '🏢 Insider Threat';
+            const canvas = document.getElementById('animationCanvas');
+
+            const office = createNode('🏢', 'server', 200, 100);
+            const employee = createNode('👨‍💼', 'victim', 100, 250); // Starts as victim/neutral
+            const cloud = createNode('☁️', 'attacker', 300, 250);
+
+            canvas.appendChild(office);
+            canvas.appendChild(employee);
+            canvas.appendChild(cloud);
+
+            addLabel('Secure Organization', 200, 190);
+            addLabel('Malicious Employee', 100, 340);
+            addLabel('Personal Cloud/Drive', 300, 340);
+
+            const steps = [
+                { text: "Employee has legitimate access to sensitive internal data", delay: 500 },
+                { text: "Employee decides to steal data for profit or revenge", delay: 2500 },
+                { text: "Data is copied to USB drive or personal cloud storage", delay: 5000 },
+                { text: "Security controls bypassed due to trusted access", delay: 7500 },
+                { text: "Sensitive trade secrets leaked outside the company", delay: 10000 },
+                { text: "Organization suffers breach from within", delay: 12500 }
+            ];
+
+            showExplanation(
+                "How Insider Threats Work",
+                "Insider threats involve individuals within an organization who misuse their authorized access to harm the organization's critical assets.",
+                steps
+            );
+
+            // Normal access
+            setTimeout(() => {
+                drawNetworkLine(employee, office);
+                animatePacketWithTrail(office, employee, '📂', 'data-flow', 1000);
+            }, 1000);
+
+            // Employee turns malicious
+            setTimeout(() => {
+                employee.textContent = '🦹';
+                employee.classList.add('attacker');
+                employee.classList.remove('victim');
+
+                createExplosion(employee, '#ff0055', 60);
+
+                const badge = document.createElement('div');
+                badge.className = 'label';
+                badge.textContent = "Disgruntled";
+                badge.style.background = '#ff0055';
+                badge.style.color = 'white';
+
+                const rect = employee.getBoundingClientRect();
+                const canvasRect = canvas.getBoundingClientRect();
+                badge.style.left = (rect.left - canvasRect.left) + 'px';
+                badge.style.top = (rect.top - canvasRect.top - 30) + 'px';
+
+                canvas.appendChild(badge);
+            }, 3000);
+
+            // Data theft
+            setTimeout(() => {
+                // Downloading mass data
+                setInterval(() => {
+                    if (canvas.contains(employee)) {
+                        animatePacketWithTrail(office, employee, '📄', 'malicious-flow', 500);
+                    }
+                }, 800);
+            }, 5000);
+
+            // Exfiltration to cloud
+            setTimeout(() => {
+                setInterval(() => {
+                    if (canvas.contains(employee)) {
+                        animatePacketWithTrail(employee, cloud, '📤', 'malicious-flow', 1000);
+                        setTimeout(() => {
+                            createDataBreach(cloud, ['Trade Secrets', 'Client List']);
+                        }, 1000);
+                    }
+                }, 1500);
+
+                // Show USB drive animation too
+                setTimeout(() => {
+                    const usb = createNode('💾', 'attacker', 100, 420);
+                    canvas.appendChild(usb);
+                    addLabel('USB Drive', 100, 480);
+
+                    animatePacketWithTrail(employee, usb, '💾', 'malicious-flow', 800);
+                }, 2000);
+            }, 7000);
+        }
+
+        function animateDNSSpoofing() {
+            document.getElementById('vizTitle').textContent = '🌐 DNS Spoofing';
+            const canvas = document.getElementById('animationCanvas');
+
+            const victim = createNode('👤', 'victim', 50, 200);
+            const dnsServer = createNode('🗄️', 'server', 250, 100);
+            const realSite = createNode('✅', 'server', 350, 300);
+            const fakeSite = createNode('❌', 'attacker', 150, 300);
+
+            canvas.appendChild(victim);
+            canvas.appendChild(dnsServer);
+            canvas.appendChild(realSite);
+            canvas.appendChild(fakeSite);
+
+            addLabel('User', 50, 290);
+            addLabel('DNS Server', 250, 190);
+            addLabel('Real Bank', 350, 390);
+            addLabel('Fake Site', 150, 390);
+
+            const steps = [
+                { text: "User types 'bank.com' into browser", delay: 500 },
+                { text: "Browser asks DNS server for IP address of bank.com", delay: 2000 },
+                { text: "Attacker poisons DNS cache with fake IP address", delay: 4000 },
+                { text: "DNS server returns the attacker's IP instead of the real one", delay: 6500 },
+                { text: "User's browser connects to the fake website", delay: 9000 },
+                { text: "User enters credentials on fake site thinking it's real", delay: 11500 }
+            ];
+
+            showExplanation(
+                "How DNS Spoofing Works",
+                "DNS spoofing (or cache poisoning) corrupts Domain Name System data, causing name servers to return an incorrect IP address and redirecting traffic.",
+                steps
+            );
+
+            // User request
+            setTimeout(() => {
+                createTypingIndicator(victim, 1000);
+                createCodeInjection(victim, 'bank.com?', -20);
+
+                setTimeout(() => {
+                    animatePacketWithTrail(victim, dnsServer, '❓', 'data-flow', 1000);
+                }, 1000);
+            }, 1000);
+
+            // Attacker poisons DNS
+            setTimeout(() => {
+                const attacker = createNode('👾', 'attacker', 400, 50);
+                canvas.appendChild(attacker);
+                addLabel('Attacker', 400, 140);
+
+                animatePacketWithTrail(attacker, dnsServer, '☠️', 'malicious-flow', 800);
+
+                setTimeout(() => {
+                    dnsServer.classList.add('warning-flash');
+                    createExplosion(dnsServer, '#ff0055', 60);
+
+                    const poisoning = document.createElement('div');
+                    poisoning.className = 'code-injection';
+                    poisoning.textContent = "bank.com = FAKE_IP";
+                    poisoning.style.color = 'red';
+
+                    const rect = dnsServer.getBoundingClientRect();
+                    const canvasRect = canvas.getBoundingClientRect();
+                    poisoning.style.left = (rect.left - canvasRect.left) + 'px';
+                    poisoning.style.top = (rect.top - canvasRect.top - 20) + 'px';
+
+                    canvas.appendChild(poisoning);
+                }, 800);
+            }, 3000);
+
+            // DNS responds with fake IP
+            setTimeout(() => {
+                animatePacketWithTrail(dnsServer, victim, '❗', 'malicious-flow', 1000);
+            }, 6000);
+
+            // User connects to fake site
+            setTimeout(() => {
+                drawNetworkLine(victim, fakeSite);
+                animatePacketWithTrail(victim, fakeSite, '🖱️', 'malicious-flow', 1000);
+
+                setTimeout(() => {
+                    const realLine = document.createElement('div');
+                    // Visual cue that real connection didn't happen
+                }, 1200);
+            }, 8000);
+
+            // Data theft
+            setTimeout(() => {
+                createTypingIndicator(fakeSite, 1000);
+                setTimeout(() => {
+                    animatePacketWithTrail(fakeSite, victim, '🔒', 'malicious-flow', 800); // Fake SSL
+
+                    setTimeout(() => {
+                        animatePacketWithTrail(victim, fakeSite, '🔑', 'malicious-flow', 1000);
+                        createDataBreach(fakeSite, ['Credentials Stolen']);
+                    }, 1500);
+                }, 1000);
+            }, 10000);
+        }
+
+        function createNode(emoji, type, top, left) {
+            const node = document.createElement('div');
+            node.className = `node ${type}`;
+            node.textContent = emoji;
+            node.style.top = top + 'px';
+            node.style.left = left + 'px';
+            return node;
+        }
+
+        function addLabel(text, top, left) {
+            const label = document.createElement('div');
+            label.className = 'label';
+            label.textContent = text;
+            label.style.top = top + 'px';
+            label.style.left = left + 'px';
+            document.getElementById('animationCanvas').appendChild(label);
+        }
+
+        function animatePacket(from, to, emoji, flowClass = 'data-flow', duration = 1000) {
+            const packet = document.createElement('div');
+            packet.className = 'packet';
+            packet.textContent = emoji;
+
+            const fromRect = from.getBoundingClientRect();
+            const toRect = to.getBoundingClientRect();
+            const canvasRect = document.getElementById('animationCanvas').getBoundingClientRect();
+
+            const startX = fromRect.left - canvasRect.left + fromRect.width / 2;
+            const startY = fromRect.top - canvasRect.top + fromRect.height / 2;
+            const endX = toRect.left - canvasRect.left + toRect.width / 2;
+            const endY = toRect.top - canvasRect.top + toRect.height / 2;
+
+            packet.style.left = startX + 'px';
+            packet.style.top = startY + 'px';
+
+            document.getElementById('animationCanvas').appendChild(packet);
+
+            const animation = packet.animate([
+                { left: startX + 'px', top: startY + 'px' },
+                { left: endX + 'px', top: endY + 'px' }
+            ], {
+                duration: duration,
+                easing: 'ease-in-out'
+            });
+
+            animation.onfinish = () => packet.remove();
+        }
+
+        function animatePacketWithTrail(from, to, emoji, flowClass = 'data-flow', duration = 1000) {
+            const packet = document.createElement('div');
+            packet.className = 'packet';
+            packet.textContent = emoji;
+
+            const fromRect = from.getBoundingClientRect();
+            const toRect = to.getBoundingClientRect();
+            const canvasRect = document.getElementById('animationCanvas').getBoundingClientRect();
+
+            const startX = fromRect.left - canvasRect.left + fromRect.width / 2;
+            const startY = fromRect.top - canvasRect.top + fromRect.height / 2;
+            const endX = toRect.left - canvasRect.left + toRect.width / 2;
+            const endY = toRect.top - canvasRect.top + toRect.height / 2;
+
+            packet.style.left = startX + 'px';
+            packet.style.top = startY + 'px';
+
+            const canvas = document.getElementById('animationCanvas');
+            canvas.appendChild(packet);
+
+            // Create trail effect
+            const trailInterval = setInterval(() => {
+                if (canvas.contains(packet)) {
+                    const trail = document.createElement('div');
+                    trail.className = 'trail';
+                    trail.style.left = packet.style.left;
+                    trail.style.top = packet.style.top;
+                    trail.style.background = flowClass.includes('malicious') ? '#ff0055' : '#00d9ff';
+                    canvas.appendChild(trail);
+
+                    setTimeout(() => trail.remove(), 500);
+                }
+            }, 50);
+
+            const animation = packet.animate([
+                { left: startX + 'px', top: startY + 'px' },
+                { left: endX + 'px', top: endY + 'px' }
+            ], {
+                duration: duration,
+                easing: 'ease-in-out'
+            });
+
+            animation.onfinish = () => {
+                clearInterval(trailInterval);
+                packet.remove();
+            };
+        }
+
+        function createExplosion(element, color, size = 100) {
+            const explosion = document.createElement('div');
+            explosion.className = 'explosion';
+            explosion.style.width = size + 'px';
+            explosion.style.height = size + 'px';
+
+            const rect = element.getBoundingClientRect ? element.getBoundingClientRect() : { left: element.offsetLeft, top: element.offsetTop };
+            const canvasRect = document.getElementById('animationCanvas').getBoundingClientRect();
+
+            explosion.style.left = (rect.left - canvasRect.left + (element.offsetWidth || 40) / 2 - size / 2) + 'px';
+            explosion.style.top = (rect.top - canvasRect.top + (element.offsetHeight || 40) / 2 - size / 2) + 'px';
+            explosion.style.background = `radial-gradient(circle, ${color}, transparent)`;
+
+            document.getElementById('animationCanvas').appendChild(explosion);
+
+            setTimeout(() => explosion.remove(), 600);
+        }
+
+        function createCrack(element, angle) {
+            const crack = document.createElement('div');
+            crack.className = 'crack';
+
+            const rect = element.getBoundingClientRect();
+            const canvasRect = document.getElementById('animationCanvas').getBoundingClientRect();
+
+            crack.style.left = (rect.left - canvasRect.left + element.offsetWidth / 2) + 'px';
+            crack.style.top = (rect.top - canvasRect.top + element.offsetHeight / 2) + 'px';
+            crack.style.transform = `rotate(${angle}deg)`;
+
+            document.getElementById('animationCanvas').appendChild(crack);
+
+            setTimeout(() => crack.remove(), 2000);
+        }
+
+        function createTypingIndicator(element, duration = 2000) {
+            const indicator = document.createElement('div');
+            indicator.className = 'typing-indicator';
+
+            for (let i = 0; i < 3; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'typing-dot';
+                indicator.appendChild(dot);
+            }
+
+            const rect = element.getBoundingClientRect();
+            const canvasRect = document.getElementById('animationCanvas').getBoundingClientRect();
+
+            indicator.style.position = 'absolute';
+            indicator.style.left = (rect.left - canvasRect.left + element.offsetWidth / 2 - 20) + 'px';
+            indicator.style.top = (rect.top - canvasRect.top - 30) + 'px';
+
+            document.getElementById('animationCanvas').appendChild(indicator);
+
+            setTimeout(() => indicator.remove(), duration);
+        }
+
+        function createDataBreach(element, dataArray) {
+            dataArray.forEach((data, idx) => {
+                setTimeout(() => {
+                    const breach = document.createElement('div');
+                    breach.className = 'data-breach';
+                    breach.textContent = data;
+
+                    const rect = element.getBoundingClientRect();
+                    const canvasRect = document.getElementById('animationCanvas').getBoundingClientRect();
+
+                    breach.style.left = (rect.left - canvasRect.left + element.offsetWidth / 2) + 'px';
+                    breach.style.top = (rect.top - canvasRect.top) + 'px';
+
+                    document.getElementById('animationCanvas').appendChild(breach);
+
+                    setTimeout(() => breach.remove(), 2000);
+                }, idx * 300);
+            });
+        }
+
+        function createCodeInjection(element, code, offset = 0) {
+            const codeElement = document.createElement('div');
+            codeElement.className = 'code-injection';
+            codeElement.textContent = code;
+
+            const rect = element.getBoundingClientRect();
+            const canvasRect = document.getElementById('animationCanvas').getBoundingClientRect();
+
+            codeElement.style.left = (rect.left - canvasRect.left) + 'px';
+            codeElement.style.top = (rect.top - canvasRect.top + offset) + 'px';
+
+            document.getElementById('animationCanvas').appendChild(codeElement);
+
+            setTimeout(() => codeElement.remove(), 3000);
+        }
+
+        function drawNetworkLine(from, to) {
+            const line = document.createElement('div');
+            line.className = 'network-line';
+
+            const fromRect = from.getBoundingClientRect();
+            const toRect = to.getBoundingClientRect();
+            const canvasRect = document.getElementById('animationCanvas').getBoundingClientRect();
+
+            const startX = fromRect.left - canvasRect.left + fromRect.width / 2;
+            const startY = fromRect.top - canvasRect.top + fromRect.height / 2;
+            const endX = toRect.left - canvasRect.left + toRect.width / 2;
+            const endY = toRect.top - canvasRect.top + toRect.height / 2;
+
+            const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+            const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+
+            line.style.width = length + 'px';
+            line.style.left = startX + 'px';
+            line.style.top = startY + 'px';
+            line.style.transform = `rotate(${angle}deg)`;
+
+            document.getElementById('animationCanvas').appendChild(line);
+
+            setTimeout(() => line.remove(), 2000);
+        }
+
+        function showExplanation(title, description, steps) {
+            const explanation = document.getElementById('explanation');
+            explanation.innerHTML = `
+                <h3>${title}</h3>
+                <p>${description}</p>
+                <div id="steps"></div>
+            `;
+
+            const stepsContainer = document.getElementById('steps');
+            steps.forEach((step, index) => {
+                const stepDiv = document.createElement('div');
+                stepDiv.className = 'step';
+                stepDiv.innerHTML = `
+                    <span class="step-number">${index + 1}</span>
+                    <span>${step.text}</span>
+                `;
+                stepsContainer.appendChild(stepDiv);
+
+                setTimeout(() => {
+                    stepDiv.classList.add('active');
+                }, step.delay);
+            });
+        }
+
+        function animateBufferOverflow() {
+            document.getElementById('vizTitle').textContent = '🪣 Buffer Overflow Attack';
+            const canvas = document.getElementById('animationCanvas');
+
+            const memory = createNode('💾', 'server', 220, 100);
+            const attacker = createNode('👾', 'attacker', 50, 200);
+
+            canvas.appendChild(memory);
+            canvas.appendChild(attacker);
+
+            addLabel('System Memory', 220, 190);
+            addLabel('Attacker', 50, 290);
+
+            // Visualize the buffer
+            const bufferContainer = document.createElement('div');
+            bufferContainer.style.position = 'absolute';
+            bufferContainer.style.top = '250px';
+            bufferContainer.style.left = '300px';
+            bufferContainer.style.width = '240px';
+            bufferContainer.style.height = '60px';
+            bufferContainer.style.border = '2px solid var(--accent-blue)';
+            bufferContainer.style.borderRadius = '5px';
+            bufferContainer.style.overflow = 'hidden';
+            bufferContainer.style.display = 'flex';
+
+            // Add slots to buffer
+            for (let i = 0; i < 8; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'buffer-slot';
+                slot.style.flex = '1';
+                slot.style.borderRight = '1px solid rgba(255,255,255,0.1)';
+                slot.style.display = 'flex';
+                slot.style.justifyContent = 'center';
+                slot.style.alignItems = 'center';
+                slot.style.fontSize = '0.8rem';
+                bufferContainer.appendChild(slot);
+            }
+
+            // Return address (critical memory) next to it
+            const returnAddress = document.createElement('div');
+            returnAddress.style.position = 'absolute';
+            returnAddress.style.top = '250px';
+            returnAddress.style.left = '560px';
+            returnAddress.style.width = '80px';
+            returnAddress.style.height = '60px';
+            returnAddress.style.border = '2px solid var(--accent-red)';
+            returnAddress.style.borderRadius = '5px';
+            returnAddress.textContent = 'RET';
+            returnAddress.style.display = 'flex';
+            returnAddress.style.justifyContent = 'center';
+            returnAddress.style.alignItems = 'center';
+            returnAddress.style.color = 'var(--accent-red)';
+
+            canvas.appendChild(bufferContainer);
+            canvas.appendChild(returnAddress);
+            addLabel('Buffer', 420, 320);
+            addLabel('Return Addr', 600, 320);
+
+            const steps = [
+                { text: "Program allocates a fixed-size buffer for input", delay: 500 },
+                { text: "Attacker sends input larger than the buffer size", delay: 2500 },
+                { text: "Excess data overflows into adjacent memory spaces", delay: 5000 },
+                { text: "Critical data like Return Address is overwritten", delay: 7500 },
+                { text: "System crashes or executes attacker's malicious code", delay: 10000 }
+            ];
+
+            showExplanation(
+                "How Buffer Overflow Works",
+                "A buffer offset occurs when a program writes more data to a buffer than it can hold, overwriting adjacent memory locations.",
+                steps
+            );
+
+            // Animate filling the buffer
+            setTimeout(() => {
+                const inputData = ['A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'X', 'X', 'X', 'X'];
+                const slots = bufferContainer.children;
+
+                inputData.forEach((char, index) => {
+                    setTimeout(() => {
+                        animatePacketWithTrail(attacker, memory, char, 'malicious-flow', 500);
+
+                        setTimeout(() => {
+                            if (index < slots.length) {
+                                slots[index].textContent = char;
+                                slots[index].style.background = 'rgba(0, 217, 255, 0.2)';
+                            } else {
+                                // Overflow!
+                                const overflowIndex = index - slots.length;
+                                if (overflowIndex < 4) { // Simulate overwriting return address
+                                    returnAddress.textContent = '💀';
+                                    returnAddress.style.background = '#ff0055';
+                                    returnAddress.style.color = 'white';
+                                    createExplosion(returnAddress, '#ff0055', 60);
+                                }
+                            }
+                        }, 500);
+                    }, index * 800);
+                });
+            }, 2000);
+
+            // Crash
+            setTimeout(() => {
+                memory.textContent = '💥';
+                memory.style.animation = 'explode 1s ease-out';
+                createExplosion(memory, '#ff0055', 150);
+            }, 12000);
+        }
+
+        function animateSessionHijacking() {
+            document.getElementById('vizTitle').textContent = '🍪 Session Hijacking';
+            const canvas = document.getElementById('animationCanvas');
+
+            const victim = createNode('👤', 'victim', 100, 100);
+            const server = createNode('☁️', 'server', 100, 500);
+            const attacker = createNode('👾', 'attacker', 300, 300);
+
+            canvas.appendChild(victim);
+            canvas.appendChild(server);
+            canvas.appendChild(attacker);
+
+            addLabel('User', 100, 190);
+            addLabel('Web Server', 100, 590);
+            addLabel('Attacker', 300, 390);
+
+            const steps = [
+                { text: "User logs in and receives a Session ID cookie", delay: 500 },
+                { text: "Attacker intercepts or steals the valid cookie", delay: 4000 },
+                { text: "Attacker places stolen cookie in their own browser", delay: 7000 },
+                { text: "Attacker accesses server posing as the victim", delay: 9500 },
+                { text: "Server accepts request thinking it's the legitimate user", delay: 12000 }
+            ];
+
+            showExplanation(
+                "How Session Hijacking Works",
+                "Session hijacking involves stealing a valid session token (cookie) to gain unauthorized access to a web server as a legitimate user.",
+                steps
+            );
+
+            // User logs in
+            setTimeout(() => {
+                animatePacketWithTrail(victim, server, 'LOGIN', 'data-flow', 1000);
+                setTimeout(() => {
+                    // Server sends cookie
+                    animatePacketWithTrail(server, victim, '🍪', 'data-flow', 1000);
+                    setTimeout(() => {
+                        const cookie = document.createElement('div');
+                        cookie.className = 'packet';
+                        cookie.textContent = '🍪';
+                        cookie.style.position = 'absolute';
+                        cookie.style.left = '135px';
+                        cookie.style.top = '100px';
+                        canvas.appendChild(cookie);
+
+                        // Attacker steals it
+                        setTimeout(() => {
+                            animatePacketWithTrail(victim, attacker, '🍪', 'malicious-flow', 1500);
+                            setTimeout(() => {
+                                cookie.remove(); // Stolen from user context visually
+
+                                const stolenCookie = document.createElement('div');
+                                stolenCookie.className = 'packet';
+                                stolenCookie.textContent = '🍪';
+                                stolenCookie.style.position = 'absolute';
+                                stolenCookie.style.left = '335px';
+                                stolenCookie.style.top = '300px';
+                                canvas.appendChild(stolenCookie);
+
+                                // Attacker uses it
+                                setTimeout(() => {
+                                    animatePacketWithTrail(attacker, server, '🍪', 'malicious-flow', 1000);
+                                    setTimeout(() => {
+                                        server.classList.add('warning-flash');
+                                        createCodeInjection(server, 'Access Granted: User', -20);
+                                    }, 1000);
+                                }, 2000);
+                            }, 1500);
+                        }, 2000);
+                    }, 1000);
+                }, 1000);
+            }, 1000);
+        }
+
+        function animateRainbowTable() {
+            document.getElementById('vizTitle').textContent = '🌈 Rainbow Table Attack';
+            const canvas = document.getElementById('animationCanvas');
+
+            const db = createNode('🗄️', 'server', 80, 80);
+            const attacker = createNode('👾', 'attacker', 80, 320);
+
+            canvas.appendChild(db);
+            canvas.appendChild(attacker);
+
+            addLabel('Password Database', 80, 170);
+            addLabel('Attacker', 80, 410);
+
+            // Draw rainbow table visualization
+            const table = document.createElement('div');
+            table.style.position = 'absolute';
+            table.style.top = '200px';
+            table.style.left = '350px';
+            table.style.width = '180px';
+            table.style.height = '120px';
+            table.style.background = 'linear-gradient(45deg, #222, #333)';
+            table.style.border = '1px solid var(--accent-blue)';
+            table.style.borderRadius = '10px';
+            table.style.padding = '10px';
+            table.style.fontSize = '0.7rem';
+            table.style.fontFamily = 'monospace';
+            table.innerHTML = `
+                <div style="color:#00ff88">Hash -> Plaintext</div>
+                <hr style="border-color:#444">
+                <div>a1b2 -> qwerty</div>
+                <div>c3d4 -> 123456</div>
+                <div>e5f6 -> admin</div>
+                <div>... -> ...</div>
+            `;
+            canvas.appendChild(table);
+            addLabel('Rainbow Table', 380, 340);
+
+            const steps = [
+                { text: "Attacker steals hashed password database", delay: 500 },
+                { text: "Instead of guessing passwords, attacker looks up hashes", delay: 2500 },
+                { text: "Uses a pre-computed 'Rainbow Table' of hash chains", delay: 5000 },
+                { text: "Instantly finds plaintext passwords for common hashes", delay: 7500 },
+                { text: "Massively faster than traditional brute force", delay: 10000 }
+            ];
+
+            showExplanation(
+                "How Rainbow Tables Work",
+                "A rainbow table is a precomputed table for caching the output of cryptographic hash functions, usually for cracking password hashes.",
+                steps
+            );
+
+            // Steal DB
+            setTimeout(() => {
+                animatePacketWithTrail(db, attacker, '🗄️', 'malicious-flow', 1500);
+                setTimeout(() => {
+                    // Start lookups
+                    const hashes = ['a1b2', 'c3d4', 'e5f6'];
+                    const plains = ['qwerty', '123456', 'admin'];
+
+                    hashes.forEach((hash, idx) => {
+                        setTimeout(() => {
+                            // Visual lookup line
+                            const lookup = document.createElement('div');
+                            lookup.className = 'packet'; // Reuse packet style for lookup dot
+                            lookup.style.width = '10px';
+                            lookup.style.height = '10px';
+                            lookup.style.background = '#00ff88';
+                            lookup.style.left = '120px'; // Attacker pos center
+                            lookup.style.top = '360px';
+                            canvas.appendChild(lookup);
+
+                            // Animate to table
+                            const anim = lookup.animate([
+                                { left: '120px', top: '360px' },
+                                { left: '440px', top: '260px' } // Table center approx
+                            ], { duration: 500, easing: 'ease-out' });
+
+                            anim.onfinish = () => {
+                                lookup.remove();
+                                // Show match
+                                createCodeInjection(attacker, `${hash} = ${plains[idx]}`, idx * 25);
+                            };
+                        }, idx * 1000);
+                    });
+                }, 1500);
+            }, 1000);
+        }
+
+        function resetVisualization() {
+            document.getElementById('visualizationArea').classList.add('hidden');
+            document.querySelectorAll('.attack-card').forEach(card => {
+                card.classList.remove('active');
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    </script>
+    <script>
+        function switchTab(tabId) {
+            // Update active state of nav links
+            const navLinks = document.querySelectorAll('.nav-link');
+            navLinks.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('onclick').includes(tabId)) {
+                    link.classList.add('active');
+                }
+            });
+
+            // Show proper tab content
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => {
+                tab.classList.remove('active-tab');
+            });
+            const activeTab = document.getElementById(tabId);
+            if (activeTab) {
+                activeTab.classList.add('active-tab');
+            }
+
+            // Reset visualizations if leaving that tab
+            if (tabId !== 'visualizations-tab') {
+                resetVisualization();
+            }
+        }
+    </script>
+</body>
+
+</html>
